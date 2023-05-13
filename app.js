@@ -4,7 +4,7 @@ const translate = require("translate");
 
 async function readFile() {
     const file = fs.createReadStream("files/input.txt");
-    const rl = readline.createInterface({ //Input Stream Reader
+    const rl1 = readline.createInterface({ //Input Stream Reader
         input: file,
         crlfDelay: Infinity
     });
@@ -13,7 +13,7 @@ async function readFile() {
         flags: "a" //append
     });
 
-    for await (const ln of rl) {
+    for await (const ln of rl1) {
         let content = "";
         if ((ln) && ln.includes("size")) { //Whether it includes text
             let isName = ln.includes("name"); // bool is Character name
@@ -26,17 +26,15 @@ async function readFile() {
             name += "\n"
 
             name = name.replace(/\\n/g," "); //Line breaks removal
-            console.log(name)
 
             if (name)
                 logger1.write(name + "\n"); //Line end break addition
 
             name = await translate(name, { from: "ja", to: "en"}); //Line translation (Can be replaced by any other language supported by the API)
             name = name.charAt(0).toUpperCase() + name.slice(1); //Capitalizing
-            if (isName)
-                content = "[" + name + "]"
-            else
-                content = name;
+
+            content = name;
+            
             content += "\n";
             if (content.includes("USER"))
                 content = content.replace("{USER}", "MC");
@@ -49,6 +47,21 @@ async function readFile() {
         if (content)
             logger2.write(content + "\n");
     }
+    
+    const rl2 = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    rl2.question("Done! Exit? (Y/N)\n", (res) => {
+        if (res != "Y" && res != "y")
+            readFile();
+        else
+            process.exit(0);
+
+        rl2.close();
+    });
+
 }
 
 readFile() //Main
